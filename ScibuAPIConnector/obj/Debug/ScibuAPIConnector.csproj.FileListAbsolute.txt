@@ -1,0 +1,17 @@
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ScibuAPIConnector.exe.config
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ScibuAPIConnector.exe
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ScibuAPIConnector.pdb
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\Newtonsoft.Json.dll
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\Newtonsoft.Json.xml
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.Form1.resources
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.Properties.Resources.resources
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.GenerateResource.Cache
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.CoreCompileInputs.cache
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.exe
+c:\users\jordanmunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.pdb
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ExcelDataReader.DataSet.dll
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ExcelDataReader.dll
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ExcelDataReader.xml
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ExcelDataReader.DataSet.xml
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csprojAssemblyReference.cache
+C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.CopyComplete
