@@ -298,7 +298,39 @@ namespace ScibuAPIConnector.Services
                     }
                 }
 
-                apiService.AddToAPi(checkMap, tables);
+                if (tables[0].Rows.Count >= 10000000)
+                {
+                    var tableCount = tables[0].Rows.Count;
+                    var oldTable = tables[0].Rows;
+                    for (var i = 0; i < tableCount; i += 1000)
+                    {
+                        tables[0].Rows = oldTable.Skip(i).Take(1000).ToList();
+                        apiService.AddToAPi(checkMap, tables);
+                    }
+                }
+                else
+                {
+                    apiService.AddToAPi(checkMap, tables);
+                }
+
+                Console.WriteLine("Done adding " + checkMap[0].CsvName);
+
+                if (checkMap[0].ApiCall.Contains("quote", StringComparison.OrdinalIgnoreCase))
+                {
+                    CacheService.CacheQuotes();
+                }
+                if (checkMap[0].ApiCall.Contains("order", StringComparison.OrdinalIgnoreCase))
+                {
+                    CacheService.CacheOrders();
+                }
+                if (checkMap[0].ApiCall.Contains("invoice", StringComparison.OrdinalIgnoreCase))
+                {
+                    CacheService.CacheInvoices();
+                }
+                if (checkMap[0].ApiCall.Contains("company", StringComparison.OrdinalIgnoreCase))
+                {
+                    CacheService.CacheCompanies();
+                }
             }
         }
     }

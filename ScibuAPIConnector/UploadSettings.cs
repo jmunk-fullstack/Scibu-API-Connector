@@ -23,6 +23,8 @@ namespace ScibuAPIConnector
         
         public static JArray Companies { get; set; }
         public static JArray Invoices { get; set; }
+        public static JArray Quotes { get; set; }
+        public static JArray Orders { get; set; }
 
     }
 }

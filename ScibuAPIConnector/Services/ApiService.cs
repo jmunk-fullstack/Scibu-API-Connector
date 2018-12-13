@@ -12,7 +12,7 @@ namespace ScibuAPIConnector.Services
     public class ApiService
     {
         private readonly string[] _customs = {"PHONE", "ADDRESS", "EMAIL", "CUSTOMFIELD"};
-        private readonly string[] _customsSolo = {"USER", "QUOTEADDR", "INVOICEADDR", "ORDERADDR"};
+        private readonly string[] _customsSolo = {"USER", "QUOTEADDR", "INVOICEADDR", "ORDERADDR", "QUOTEOPPORTUNITY"};
         private readonly string[] _cannotBeNull = {"PhoneNumber"};
 
         public List<Dictionary<string, object>> UpdateCustomsToPostData(List<Dictionary<string, object>> allPostData)
@@ -149,9 +149,11 @@ namespace ScibuAPIConnector.Services
             foreach (var csvTable in csvTables)
             {
                 //Read all the CSV Rows
+                var i = 1;
                 foreach (var csvRow in csvTable.Rows)
                 {
-                    Console.WriteLine("Mapping " + csvTable.CsvName + "...");
+                    Console.WriteLine("Mapping " + csvTable.CsvName + "... (" + i + " of " + csvTable.Rows.Count + ")");
+                    i++;
                     //New POST data
                     var postData = new Dictionary<string, object>();
 
@@ -181,6 +183,9 @@ namespace ScibuAPIConnector.Services
                             //Add Date to result
                             result = GetResultFromAddDate(result, mappingRow, csvTable, csvRow);
 
+                            // Get Month/Year from row
+                            result = GetResultFromDate(result, mappingRow, csvTable, csvRow);
+
                             //Get data from foreign key / primary key
                             result = GetResultFromKey(result, mappingRow, csvTable, csvRow, token);
                         }
@@ -193,33 +198,12 @@ namespace ScibuAPIConnector.Services
                             {
                                 result = result.Replace(",", ".");
                             }
-                            
+
                             // Custom IF statements in the remark
                             result = GetResultFromCustomIf(result, mappingRow, csvTable, csvRow, token);
 
                             // Merge two or more CSV rows in one API call
                             result = GetResultFromMerge(result, mappingRow, csvTable, csvRow, token);
-
-                            // Add AddToApi to the result name
-                            if (mappingRow.Remark.Contains("ADDTOAPI"))
-                            {
-                                if (mappingRow.Remark.Contains("FIELD"))
-                                {
-                                    var stringSeparators = new[] { "FIELD" };
-
-                                    mappingRow.Remark = mappingRow.Remark.Replace("COMMA_TO_DOT", "");
-                                    var field = mappingRow.Remark.Split(stringSeparators, StringSplitOptions.None)[1].Split(' ')[0];
-                                    var varIndex = Array.FindIndex(csvTable.Columns,
-                                        row => row.ToString() == field);
-                                    if (varIndex != -1)
-                                    {
-                                        var resultIndex = csvRow[varIndex];
-                                        mappingRow.Remark = mappingRow.Remark.Replace(field, resultIndex);
-                                    }
-                                }
-
-                                result = result + "_" + mappingRow.Remark;
-                            }
                         }
 
                         //Add _CUSTOM to the result if it contains a custom
@@ -241,70 +225,21 @@ namespace ScibuAPIConnector.Services
             }
 
             var checkAllPostData = UpdateCustomsToPostData(allPostData);
+
+            var count = 0;
             foreach (var updatedPostData in checkAllPostData)
             {
+                count++;
                 var requestService = new RequestService();
                 UploadSettings.UploadCall = mappingRows[0].ApiCall;
 
-                var keys = new List<string>(updatedPostData.Keys);
-                var foundKey = "";
-                foreach (var key in keys)
-                {
-                    if (!updatedPostData[key].ToString().Contains("ADDTOAPI")) continue;
-
-                    foundKey = key + "_" + updatedPostData[key].ToString().Split('_')[1];
-                    updatedPostData[key] = updatedPostData[key].ToString().Split('_')[0];
-                }
-
+                Console.WriteLine("Adding " + mappingRows[0].ApiCall + " (" + count + " of " + checkAllPostData.Count +")");
                 var id = Parse(requestService.PostRequest(mappingRows[0].ApiCall,
                     JsonConvert.SerializeObject(updatedPostData)));
-
-                if (foundKey != "")
-                    AddExtraToApi(updatedPostData, id, foundKey, token);
-            }
-        }
-
-        public void AddExtraToApi(Dictionary<string, object> updatedPostData, int id, string foundKey, Token token)
-        {
-            var key = foundKey.Split('_')[0];
-            var stringSeparators = new[] {"ADDTOAPI:"};
-            var addStatements = foundKey.Split(stringSeparators, StringSplitOptions.None);
-            var addApi = addStatements[1].Split('(')[0];
-            if (addStatements[0].Split('_')[1].Contains("NOTEMPTY"))
-            {
-                if (string.IsNullOrEmpty(updatedPostData[key].ToString()))
-                {
-                    return;
-                }
             }
 
-            var statements = addStatements[1].Split('(')[1].Split(' ');
-            var postData = new Dictionary<string, object>();
-            foreach (var statement in statements)
-            {
-                if (statement == ")") continue;
-
-                var value = statement.Split('=')[1].Replace(")", "");
-                if (value == "id")
-                {
-                    postData.Add(statement.Split('=')[0], id);
-                }
-                else if (value.Contains("TEXT"))
-                {
-                    postData.Add(statement.Split('=')[0], value.Replace("TEXT", ""));
-                }
-                else if (value.Contains("FIELD"))
-                {
-                    postData.Add(statement.Split('=')[0], value.Replace("FIELD", ""));
-                }
-                else
-                {
-                    postData.Add(statement.Split('=')[0], updatedPostData[value]);
-                }
-            }
-
-            var requestService = new RequestService();
-            requestService.PostRequest(addApi, JsonConvert.SerializeObject(postData));
+            checkAllPostData = null;
+            allPostData = null;
         }
 
         public void AddCustomField(List<MappingRow> mappingRows)
@@ -358,6 +293,29 @@ namespace ScibuAPIConnector.Services
                 result = "USER_" + mappingRow.DefaultValue;
             else
                 result = mappingRow.DefaultValue;
+
+            return result;
+        }
+
+        public string GetResultFromDate(string currentResult, MappingRow mappingRow, CsvTable csvTable, string[] csvRow)
+        {
+            var result = currentResult;
+            
+            if (mappingRow.Remark.Contains("GETMONTH"))
+            {
+                var key = mappingRow.Remark.Split('=')[1];
+                var indexKey = Array.FindIndex(csvTable.Columns,
+                    row => row.ToString() == key);
+                result = DateTime.Parse(csvRow[indexKey]).Month.ToString();
+            }
+
+            if (mappingRow.Remark.Contains("GETYEAR"))
+            {
+                var key = mappingRow.Remark.Split('=')[1];
+                var indexKey = Array.FindIndex(csvTable.Columns,
+                    row => row.ToString() == key);
+                result = DateTime.Parse(csvRow[indexKey]).Year.ToString();
+            }
 
             return result;
         }
