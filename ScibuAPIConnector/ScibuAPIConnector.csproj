@@ -59,7 +59,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomFunctions\Technea.cs" />
     <Compile Include="Extensions\ConverterExtension.cs" />
+    <Compile Include="Extensions\LogExtension.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\WebResponseExtension.cs" />
     <Compile Include="Form1.cs">
@@ -69,7 +71,9 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Client.cs" />
-    <Compile Include="Models\CsvTable.cs" />
+    <Compile Include="Models\CSVTable.cs" />
+    <Compile Include="Models\ImportTable.cs" />
+    <Compile Include="Models\MappingRow.cs" />
     <Compile Include="Models\MappingTable.cs" />
     <Compile Include="Models\PostData.cs" />
     <Compile Include="Models\Token.cs" />
@@ -84,6 +88,8 @@
     <Compile Include="Services\LoggingService.cs" />
     <Compile Include="Services\MappingService.cs" />
     <Compile Include="Services\RequestService.cs" />
+    <Compile Include="Services\UblReader.cs" />
+    <Compile Include="Services\XmlReader.cs" />
     <Compile Include="UploadSettings.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

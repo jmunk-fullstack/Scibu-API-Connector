@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using ScibuAPIConnector.Extensions;
 using ScibuAPIConnector.Models;
 
@@ -8,45 +10,69 @@ namespace ScibuAPIConnector.Services
 {
     public class MappingService
     {
-        public CsvTable MapCsv(string csvName, string csvFile)
+        public void DownloadFiles()
         {
-            //Get all the lines from the CSV file
-            var csvReader = new CsvReader();
-            var getCsvLines = csvReader.ReadCsv(csvFile);
-
-            //First line is the column
-            var columns = getCsvLines[0].Split('\t').ToArray();
-
-            //Remove special characters
-            for (var i = 0; i < columns.Length; i++)
+            string[] uploadFiles;
+            int num;
+            if (UploadSettings.DownloadFiles != "true")
             {
-                columns[i] = columns[i].RemoveSpecialCharacters();
+                return;
             }
-
-            //Creating the row
-            var rows = new List<string[]>();
-
-            var count = 0;
-            foreach (var row in getCsvLines)
+            else
             {
-                //Count 0 is the column
-                if (count != 0)
+                uploadFiles = UploadSettings.UploadFiles;
+                num = 0;
+            }
+            while (true)
+            {
+                while (true)
                 {
-                    //The CSV needs to be tab-delimited
-                    var csvRow = row.Split('\t').ToArray();
-
-                    for (var i = 0; i < csvRow.Length; i++)
+                    if (num < uploadFiles.Length)
                     {
-                        csvRow[i] = csvRow[i].RemoveSpecialCharacters();
+                        string str = uploadFiles[num];
+                        string str2 = str;
+                        if (UploadSettings.DatabaseName == "techneaportal")
+                        {
+                            if (str.Contains("Offerteregels"))
+                            {
+                                str2 = "offertes/Offerteregels";
+                            }
+                            else if (str.Contains("Offertes"))
+                            {
+                                str2 = "offertes/Offertes";
+                            }
+                        }
+                        string uploadType = UploadSettings.UploadType;
+                        if (uploadType == "CSV")
+                        {
+                            uploadType = "csv";
+                        }
+                        Console.WriteLine("Downloading files from the FTP server...");
+                        string path = UploadSettings.ImportLocation + str + "." + UploadSettings.UploadType;
+                        string address = UploadSettings.FilesUrl + str2 + "." + uploadType;
+                        using (WebClient client = new WebClient())
+                        {
+                            byte[] buffer = client.DownloadData(address);
+                            if (File.Exists(path))
+                            {
+                                File.Delete(path);
+                            }
+                            using (FileStream stream = File.Create(path))
+                            {
+                                stream.Write(buffer, 0, buffer.Length);
+                                stream.Close();
+                            }
+                        }
                     }
-
-                    rows.Add(csvRow);
+                    else
+                    {
+                        Console.WriteLine("Downloading done!");
+                        return;
+                    }
+                    break;
                 }
-
-                count++;
+                num++;
             }
-
-            return new CsvTable(csvName, columns, rows);
         }
 
         public List<MappingTable> MapXls(string xlsFile)
@@ -130,10 +156,10 @@ namespace ScibuAPIConnector.Services
             return mappingTables;
         }
 
-        public List<List<MappingRow>> GetUniqueMappingRows(List<CsvTable> csvTables)
+        public List<List<MappingRow>> GetUniqueMappingRows(List<ImportTable> csvTables)
         {
             //Get the Mapping table
-            var mappingTables = MapXls(@"\\192.168.0.37\Klanten\HKV Ochten\mapping\Testing_Mapping_Jordan.xlsx");
+            var mappingTables = MapXls(UploadSettings.MappingFileLocation);
 
             var uniqueLists = new List<List<List<MappingRow>>>();
 
@@ -146,7 +172,7 @@ namespace ScibuAPIConnector.Services
                 foreach (var mappingTable in mappingTables)
                 {
                     //Check if the CSV name is equal to the mapping csv table.
-                    if (mappingTable.CsvName != csvTable.CsvName) continue;
+                    if (mappingTable.CsvName != csvTable.ImportName) continue;
 
                     //Loop through all rows
                     foreach (var mappingRow in mappingTable.Rows)
@@ -212,124 +238,126 @@ namespace ScibuAPIConnector.Services
 
         public void GenerateMapping()
         {
-            //Get unique mapping rows by API call
-            var csvTables = UploadSettings.UploadFiles
-                .Select(file => MapCsv(file, @"\\192.168.0.37\Klanten\HKV Ochten\Import\Testcase\" + file + ".csv")).ToList();
-            var uniqueMappingRows = GetUniqueMappingRows(csvTables);
-
-            //Merge customs
-            foreach (var checkMap in uniqueMappingRows.ToList())
+            DownloadFiles();
+            List<ImportTable> importTables = new List<ImportTable>();
+            if ((UploadSettings.UploadFiles.Length != 1) || (UploadSettings.UploadFiles[0] != ""))
             {
-                //Get customs
-                var apiService = new ApiService();
-                var customs = apiService.GetCustoms();
-
-                foreach (var custom in customs)
+                //Get unique mapping rows by API call
+                if (UploadSettings.UploadType == "CSV")
                 {
-                    if (!checkMap[0].ApiCall.ToUpper().Contains(custom) && !checkMap[0].Remark.ToUpper().Contains(custom)) continue;
+                    CsvReader CsvReader = new CsvReader();
+                    importTables = (from file in UploadSettings.UploadFiles select CsvReader.MapCsv(file, UploadSettings.ImportLocation + file + ".csv")).ToList<ImportTable>();
+                }
+                if (UploadSettings.UploadType == "XML")
+                {
+                    XmlReader XmlReader = new XmlReader();
+                    importTables = (from file in UploadSettings.UploadFiles select XmlReader.MapXml(file, UploadSettings.ImportLocation + file + ".xml")).ToList<ImportTable>();
+                }
+                if (UploadSettings.UploadType == "UBL")
+                {
+                    UblReader UblReader = new UblReader();
+                    importTables = UblReader.GetImportTables(UploadSettings.ImportLocation + "Facturen.xml");
+                }
 
-                    // Merging custom fields with original
-                    if (custom.Equals("CUSTOMFIELD"))
+                var uniqueMappingRows = GetUniqueMappingRows(importTables);
+
+                //Merge customs
+                foreach (var checkMap in uniqueMappingRows.ToList())
+                {
+                    //Get customs
+                    var apiService = new ApiService();
+                    var customs = apiService.GetCustoms();
+
+                    foreach (var custom in customs)
                     {
-                        // Add Custom Field Function
-                        apiService.AddCustomField(checkMap);
+                        if (!checkMap[0].ApiCall.ToUpper().Contains(custom) && !checkMap[0].Remark.ToUpper().Contains(custom)) continue;
 
-                        //Get the API Call
-                        var mapWithoutCustom = checkMap[0].ApiCall.Replace("customfield", "");
-
-                        //Combine the customfield list to the normal one
-                        foreach (var checkMap2 in uniqueMappingRows.ToList())
+                        // Merging custom fields with original
+                        if (custom.Equals("CUSTOMFIELD"))
                         {
-                            if (checkMap2[0].ApiCall != mapWithoutCustom) continue;
+                            // Add Custom Field Function
+                            apiService.AddCustomField(checkMap);
 
-                            checkMap2.AddRange(checkMap);
-                            uniqueMappingRows.Remove(checkMap);
+                            //Get the API Call
+                            var mapWithoutCustom = checkMap[0].ApiCall.Replace("customfield", "");
+
+                            //Combine the customfield list to the normal one
+                            foreach (var checkMap2 in uniqueMappingRows.ToList())
+                            {
+                                if (checkMap2[0].ApiCall != mapWithoutCustom) continue;
+
+                                checkMap2.AddRange(checkMap);
+                                uniqueMappingRows.Remove(checkMap);
+                            }
+
+                            //Remove customfield to the API Calls
+                            foreach (var map in checkMap.ToList())
+                            {
+                                map.ApiCall = mapWithoutCustom;
+                                map.Remark = "CUSTOMFIELD";
+                            }
                         }
-
-                        //Remove customfield to the API Calls
-                        foreach (var map in checkMap.ToList())
+                        else
                         {
-                            map.ApiCall = mapWithoutCustom;
-                            map.Remark = "CUSTOMFIELD";
+                            var mapTo = "";
+                            if (checkMap[0].Remark.Contains("MAPTO_INSIDE"))
+                            {
+                                mapTo = checkMap[0].Remark.Split('=')[1];
+                                checkMap[0].ApiField = mapTo + "_" + custom + "_" + checkMap[0].ApiField;
+                            }
+
+                            //Combine the customfield list to the mapper
+                            foreach (var checkMap2 in uniqueMappingRows.ToList())
+                            {
+                                if (mapTo == "") continue;
+                                if (!checkMap2[0].ApiCall.ToUpper().Contains(mapTo)) continue;
+
+                                checkMap2.AddRange(checkMap);
+                                uniqueMappingRows.Remove(checkMap);
+                            }
+                        }
+                    }
+                }
+
+                foreach (var checkMap in uniqueMappingRows)
+                {
+                    if (checkMap[0].ApiCall.Contains("customfield")) continue;
+
+                    // Check if 
+                    var apiService = new ApiService();
+                    var tables = new List<ImportTable>();
+                    // Add API Function
+                    foreach (var table in importTables)
+                    {
+                        if (table.ImportName != checkMap[0].CsvName) continue;
+                        tables.Add(table);
+
+                        if (table.ImportName != "Klanten") continue;
+                        foreach (var table2 in importTables)
+                        {
+                            if (table2.ImportName == "Klant_adressen")
+                            {
+                                tables.Add(table2);
+                            }
+                        }
+                    }
+
+                    if (tables[0].Rows.Count >= 10000000)
+                    {
+                        var tableCount = tables[0].Rows.Count;
+                        var oldTable = tables[0].Rows;
+                        for (var i = 0; i < tableCount; i += 1000)
+                        {
+                            tables[0].Rows = oldTable.Skip(i).Take(1000).ToList();
+                            apiService.AddToAPi(checkMap, tables);
                         }
                     }
                     else
                     {
-                        var mapTo = "";
-                        if (checkMap[0].Remark.Contains("MAPTO_INSIDE"))
-                        {
-                            mapTo = checkMap[0].Remark.Split('=')[1];
-                            checkMap[0].ApiField = mapTo + "_" + custom + "_" + checkMap[0].ApiField;
-                        }
-
-                        //Combine the customfield list to the mapper
-                        foreach (var checkMap2 in uniqueMappingRows.ToList())
-                        {
-                            if (mapTo == "") continue;
-                            if (!checkMap2[0].ApiCall.ToUpper().Contains(mapTo)) continue;
-
-                            checkMap2.AddRange(checkMap);
-                            uniqueMappingRows.Remove(checkMap);
-                        }
-                    }
-                }
-            }
-
-            foreach (var checkMap in uniqueMappingRows)
-            {
-                if (checkMap[0].ApiCall.Contains("customfield")) continue;
-
-                // Check if 
-                var apiService = new ApiService();
-                var tables = new List<CsvTable>();
-                // Add API Function
-                foreach (var csvTable in csvTables)
-                {
-                    if (csvTable.CsvName != checkMap[0].CsvName) continue;
-                    tables.Add(csvTable);
-
-                    if (csvTable.CsvName != "Klanten") continue;
-                    foreach (var csvTable2 in csvTables)
-                    {
-                        if (csvTable2.CsvName == "Klant_adressen")
-                        {
-                            tables.Add(csvTable2);
-                        }
-                    }
-                }
-
-                if (tables[0].Rows.Count >= 10000000)
-                {
-                    var tableCount = tables[0].Rows.Count;
-                    var oldTable = tables[0].Rows;
-                    for (var i = 0; i < tableCount; i += 1000)
-                    {
-                        tables[0].Rows = oldTable.Skip(i).Take(1000).ToList();
                         apiService.AddToAPi(checkMap, tables);
                     }
-                }
-                else
-                {
-                    apiService.AddToAPi(checkMap, tables);
-                }
 
-                Console.WriteLine("Done adding " + checkMap[0].CsvName);
-
-                if (checkMap[0].ApiCall.Contains("quote", StringComparison.OrdinalIgnoreCase))
-                {
-                    CacheService.CacheQuotes();
-                }
-                if (checkMap[0].ApiCall.Contains("order", StringComparison.OrdinalIgnoreCase))
-                {
-                    CacheService.CacheOrders();
-                }
-                if (checkMap[0].ApiCall.Contains("invoice", StringComparison.OrdinalIgnoreCase))
-                {
-                    CacheService.CacheInvoices();
-                }
-                if (checkMap[0].ApiCall.Contains("company", StringComparison.OrdinalIgnoreCase))
-                {
-                    CacheService.CacheCompanies();
+                    Console.WriteLine("Done adding " + checkMap[0].CsvName);
                 }
             }
         }
