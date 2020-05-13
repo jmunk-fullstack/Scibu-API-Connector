@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ScibuAPIConnector.CustomFunctions;
 using ScibuAPIConnector.Extensions;
 using ScibuAPIConnector.Models;
@@ -296,7 +294,8 @@ namespace ScibuAPIConnector.Services
                             else
                             {
                                 list.Add(item);
-                                new Dictionary<string, object>().Add(text, dictionary4[str4].ToString().Replace(str3 + "_", ""));
+                                item = new Dictionary<string, object>();
+                                item.Add(text, dictionary4[str4].ToString().Replace(str3 + "_", ""));
                             }
                             dictionary4.Remove(str4);
                         }
