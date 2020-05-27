@@ -12,7 +12,8 @@ namespace ScibuAPIConnector.Services
 {
     public class RequestService
     {
-        public string Url = "http://api.scibu.com/api/";
+        public string Url = "https://api.scibu.com/api/";
+     //   public string Url = "http://localhost:3366/api/";
 
         public int AlreadyExist(string endpoint, string postData)
         {
@@ -352,7 +353,7 @@ namespace ScibuAPIConnector.Services
                         {
                             return "-1";
                         }
-                        else if ((UploadSettings.LastDateUpdate == DateTime.Now.Date.ToShortDateString()) && (UploadSettings.DatabaseName != "hkvportal"))
+                        else if ((UploadSettings.LastDateUpdate == DateTime.Now.Date.ToShortDateString()) && (UploadSettings.DatabaseName != "hkvportal") && (UploadSettings.DatabaseName != "continentaltestportal"))
                         {
                             return "-1";
                         }
@@ -692,7 +693,7 @@ namespace ScibuAPIConnector.Services
                     return GetWebRequest(endpoint, customFilter, topFilter, jsonKey, null, null);
                 }
             }
-            return GetRequest(endpoint, customFilter, topFilter, jsonKey);
+            return GetWebRequest(endpoint, customFilter, topFilter, jsonKey);
         }
     }
 }

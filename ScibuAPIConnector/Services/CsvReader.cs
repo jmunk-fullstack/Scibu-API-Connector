@@ -9,10 +9,14 @@
 
     public class CsvReader
     {
-        public ImportTable MapCsv(string csvName, string csvFile)
+        public ImportTable MapCsv(string csvName, string csvFile, string customSeperator)
         {
             List<string> list = this.ReadCsv(csvFile);
             char[] separator = new char[] { '\t' };
+            if(customSeperator != "tab")
+            {
+                separator = new char[] { ',' };
+            }
             string[] columns = list[0].Split(separator).ToArray<string>();
             int index = 0;
             while (true)
@@ -26,6 +30,10 @@
                         if (num != 0)
                         {
                             char[] chArray2 = new char[] { '\t' };
+                            if (customSeperator != "tab")
+                            {
+                                chArray2 = new char[] { ',' };
+                            }
                             string[] item = str.Split(chArray2).ToArray<string>();
                             int num3 = 0;
                             while (true)

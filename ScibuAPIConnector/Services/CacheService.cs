@@ -237,16 +237,29 @@ namespace ScibuAPIConnector.Services
             {
                 Console.WriteLine("Caching all the invoice products...");
                 JArray array2 = new JArray();
-                foreach (JToken token in JsonConvert.DeserializeObject<JArray>(service.GetWebRequest("invoice_product", null, "9999999", null, null, "[Id],[ExternalId],[Order],[InvoiceId]")))
+                var doneCaching = false;
+
+                var count = 0;
+                while (!doneCaching)
                 {
-                    JArray array1 = new JArray();
-                    array1.Add(token["id"]);
-                    array1.Add(token["externalId"]);
-                    array1.Add(token["order"]);
-                    array1.Add(token["invoiceId"]);
-                    JArray item = array1;
-                    array2.Add(item);
+                    var jsonArray = JsonConvert.DeserializeObject<JArray>(service.GetWebRequest("invoice_product", null, "100000", null, (100000 * count).ToString(), "[Id],[ExternalId],[Order],[InvoiceId]"));
+                    if (jsonArray.Count == 0)
+                        doneCaching = true;
+
+                    foreach (JToken token in jsonArray)
+                    {
+                        JArray array1 = new JArray();
+                        array1.Add(token["id"]);
+                        array1.Add(token["externalId"]);
+                        array1.Add(token["order"]);
+                        array1.Add(token["invoiceId"]);
+                        JArray item = array1;
+                        array2.Add(item);
+                    }
+
+                    count++;
                 }
+
                 UploadSettings.InvoiceProducts = array2;
                 Console.WriteLine("Invoice Products cached!");
             }
@@ -373,31 +386,44 @@ namespace ScibuAPIConnector.Services
             RequestService service = new RequestService();
             if (UploadSettings.UploadFiles.Any<string>(s => (s.IndexOf("offerteregel", StringComparison.CurrentCultureIgnoreCase) > -1)) || UploadSettings.UploadFiles.Any<string>(s => (s.IndexOf("offerte_regel", StringComparison.CurrentCultureIgnoreCase) > -1)))
             {
-                Console.WriteLine("Caching all the quote products...");
-                string str = service.GetWebRequest("quote_product", null, "9999999", null, null, "[Id],[ArticleNumber],[TypeRowIndex],[RevisionId],[QuoteId]");
-                if (UploadSettings.DatabaseName == "techneaportal")
-                {
-                    str = service.GetWebRequest("quote_product", null, "9999999", null, null, null);
-                }
+                Console.WriteLine("Caching all the invoice products...");
                 JArray array2 = new JArray();
-                foreach (JToken token in JsonConvert.DeserializeObject<JArray>(str))
+                var doneCaching = false;
+
+                var count = 0;
+                while (!doneCaching)
                 {
-                    JArray array1 = new JArray();
-                    array1.Add(token["id"]);
-                    array1.Add(token["articleNumber"]);
-                    array1.Add(token["typeRowIndex"]);
-                    array1.Add(token["quoteId"]);
-                    JArray item = array1;
+                    var jsonArray = JsonConvert.DeserializeObject<JArray>(service.GetWebRequest("quote_product", null, "1000000", null, (100000 * count).ToString(), "[Id],[ArticleNumber],[TypeRowIndex],[RevisionId],[QuoteId]"));
                     if (UploadSettings.DatabaseName == "techneaportal")
                     {
-                        JArray array4 = new JArray();
-                        array4.Add(token["id"]);
-                        array4.Add(token["articleNumber"]);
-                        array4.Add(token["quoteId"]);
-                        item = array4;
+                        jsonArray = JsonConvert.DeserializeObject<JArray>(service.GetWebRequest("quote_product", null, "1000000", null, (100000 * count).ToString(), null));
                     }
-                    array2.Add(item);
+                    
+                    if (jsonArray.Count == 0)
+                        doneCaching = true;
+
+                    foreach (JToken token in jsonArray)
+                    {
+                        JArray array1 = new JArray();
+                        array1.Add(token["id"]);
+                        array1.Add(token["articleNumber"]);
+                        array1.Add(token["typeRowIndex"]);
+                        array1.Add(token["quoteId"]);
+                        JArray item = array1;
+                        if (UploadSettings.DatabaseName == "techneaportal")
+                        {
+                            JArray array4 = new JArray();
+                            array4.Add(token["id"]);
+                            array4.Add(token["articleNumber"]);
+                            array4.Add(token["quoteId"]);
+                            item = array4;
+                        }
+                        array2.Add(item);
+                    }
+
+                    count++;
                 }
+
                 UploadSettings.QuoteProducts = array2;
                 Console.WriteLine("Quote Products cached!");
             }

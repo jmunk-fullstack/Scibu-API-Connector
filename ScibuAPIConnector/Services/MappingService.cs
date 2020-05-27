@@ -246,7 +246,7 @@ namespace ScibuAPIConnector.Services
                 if (UploadSettings.UploadType == "CSV")
                 {
                     CsvReader CsvReader = new CsvReader();
-                    importTables = (from file in UploadSettings.UploadFiles select CsvReader.MapCsv(file, UploadSettings.ImportLocation + file + ".csv")).ToList<ImportTable>();
+                    importTables = (from file in UploadSettings.UploadFiles select CsvReader.MapCsv(file, UploadSettings.ImportLocation + file + ".csv", UploadSettings.UploadSeperator)).ToList<ImportTable>();
                 }
                 if (UploadSettings.UploadType == "XML")
                 {

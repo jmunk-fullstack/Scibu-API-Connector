@@ -15,7 +15,6 @@ C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\E
 C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\bin\Debug\ExcelDataReader.DataSet.xml
 C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csprojAssemblyReference.cache
 C:\Users\JordanMunk\source\repos\ScibuAPIConnector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.CopyComplete
-E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csprojAssemblyReference.cache
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.Form1.resources
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.Properties.Resources.resources
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.GenerateResource.cache

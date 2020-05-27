@@ -127,7 +127,13 @@ namespace ScibuAPIConnector.Services
 
                                 if (mappingRow.Remark.Contains("FORMATDATE"))
                                 {
-                                    result = (UploadSettings.DatabaseName != "hkvportal") ? ((result.Contains("-") || result.Contains("/")) ? DateTime.Parse(result).ToString("MM/dd/yyyy") : DateTime.ParseExact(result, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy")) : ((result != "") ? DateTime.ParseExact(result, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") : DateTime.ParseExact("01-01-2001", "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                                    if (result.Contains("."))
+                                    {
+                                        result = DateTime.ParseExact(result, "dd.MM.yyyy", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy");
+                                    } else
+                                    {
+                                        result = (UploadSettings.DatabaseName != "hkvportal") ? ((result.Contains("-") || result.Contains("/")) ? DateTime.Parse(result).ToString("MM/dd/yyyy") : DateTime.ParseExact(result, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy")) : ((result != "") ? DateTime.ParseExact(result, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") : DateTime.ParseExact("01-01-2001", "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                                    }
                                 }
 
                                 if (mappingRow.Remark.Contains("GET_DATE") && ((UploadSettings.DatabaseName == "hkvportal") && (result != "")))
@@ -517,7 +523,16 @@ namespace ScibuAPIConnector.Services
                 {
                     string s = csvRow[index];
                     DateTime time = new DateTime();
-                    time = !s.Contains("-") ? DateTime.ParseExact(s, "yyyyMMdd", CultureInfo.InvariantCulture) : DateTime.ParseExact(s, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    if (s.Contains("."))
+                    {
+                        time = DateTime.ParseExact(s, "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        time = !s.Contains("-") ? DateTime.ParseExact(s, "yyyyMMdd", CultureInfo.InvariantCulture) : DateTime.ParseExact(s, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    }
+
+                    
                     if (!str2.Contains("MONTH"))
                     {
                         str5 = str;

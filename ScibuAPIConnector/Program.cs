@@ -47,6 +47,7 @@
             UploadSettings.UploadFiles = ConfigurationManager.AppSettings["UploadFiles"].Split(separator);
             UploadSettings.UploadName = ConfigurationManager.AppSettings["UploadName"];
             UploadSettings.UploadType = ConfigurationManager.AppSettings["UploadType"];
+            UploadSettings.UploadSeperator = ConfigurationManager.AppSettings["UploadSeperator"];
             UploadSettings.MappingFileLocation = ConfigurationManager.AppSettings["MappingFileLocation"];
             UploadSettings.CronjobInMinutes = ConfigurationManager.AppSettings["CronjobInMinutes"];
             UploadSettings.ImportLocation = ConfigurationManager.AppSettings["ImportLocation"];

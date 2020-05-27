@@ -14,6 +14,7 @@ namespace ScibuAPIConnector
         public static string UploadName { get; set; }
         public static string UploadType { get; set; }
         public static string UploadCall { get; set; }
+        public static string UploadSeperator { get; set; }
         public static string[] UploadFiles { get; set; }
         public static string MappingFileLocation { get; set; }
         public static string FilesUrl { get; set; }
