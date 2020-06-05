@@ -31,3 +31,4 @@ E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\bin\Debug\ExcelDataReader.xml
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\bin\Debug\ExcelDataReader.DataSet.xml
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\bin\Debug\Newtonsoft.Json.xml
 E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csproj.CopyComplete
+E:\Qubics\Scibu-API-Connector\ScibuAPIConnector\obj\Debug\ScibuAPIConnector.csprojAssemblyReference.cache
