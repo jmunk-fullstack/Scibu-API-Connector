@@ -569,6 +569,13 @@ namespace ScibuAPIConnector.Services
                 string str5 = csvRow[index];
                 string[] textArray2 = new string[] { "[", str4, "]='", str5, "'" };
                 str6 = new RequestService().GetRequest(strArray2[0].ToLower(), string.Concat(textArray2), null, strArray2[2]);
+                
+                //Quick fix for no product found
+                if(foreignKey == "Artikelnummer" && str6 == "0")
+                {
+                    int index2 = Array.FindIndex<string>(csvTable.Columns, row => row.ToString() == "Artikelomschrijving");
+                    str6 = csvRow[index2];
+                }
             }
             return str6;
         }
