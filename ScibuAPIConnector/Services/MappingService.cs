@@ -10,70 +10,7 @@ namespace ScibuAPIConnector.Services
 {
     public class MappingService
     {
-        public void DownloadFiles()
-        {
-            string[] uploadFiles;
-            int num;
-            if (UploadSettings.DownloadFiles != "true")
-            {
-                return;
-            }
-            else
-            {
-                uploadFiles = UploadSettings.UploadFiles;
-                num = 0;
-            }
-            while (true)
-            {
-                while (true)
-                {
-                    if (num < uploadFiles.Length)
-                    {
-                        string str = uploadFiles[num];
-                        string str2 = str;
-                        if (UploadSettings.DatabaseName == "techneaportal")
-                        {
-                            if (str.Contains("Offerteregels"))
-                            {
-                                str2 = "offertes/Offerteregels";
-                            }
-                            else if (str.Contains("Offertes"))
-                            {
-                                str2 = "offertes/Offertes";
-                            }
-                        }
-                        string uploadType = UploadSettings.UploadType;
-                        if (uploadType == "CSV")
-                        {
-                            uploadType = "csv";
-                        }
-                        Console.WriteLine("Downloading files from the FTP server...");
-                        string path = UploadSettings.ImportLocation + str + "." + UploadSettings.UploadType;
-                        string address = UploadSettings.FilesUrl + str2 + "." + uploadType;
-                        using (WebClient client = new WebClient())
-                        {
-                            byte[] buffer = client.DownloadData(address);
-                            if (File.Exists(path))
-                            {
-                                File.Delete(path);
-                            }
-                            using (FileStream stream = File.Create(path))
-                            {
-                                stream.Write(buffer, 0, buffer.Length);
-                                stream.Close();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Downloading done!");
-                        return;
-                    }
-                    break;
-                }
-                num++;
-            }
-        }
+        
 
         public List<MappingTable> MapXls(string xlsFile)
         {
@@ -238,7 +175,6 @@ namespace ScibuAPIConnector.Services
 
         public void GenerateMapping()
         {
-            DownloadFiles();
             List<ImportTable> importTables = new List<ImportTable>();
             if ((UploadSettings.UploadFiles.Length != 1) || (UploadSettings.UploadFiles[0] != ""))
             {
@@ -252,6 +188,11 @@ namespace ScibuAPIConnector.Services
                 {
                     XmlReader XmlReader = new XmlReader();
                     importTables = (from file in UploadSettings.UploadFiles select XmlReader.MapXml(file, UploadSettings.ImportLocation + file + ".xml")).ToList<ImportTable>();
+                }
+                if (UploadSettings.UploadType == "TECHNEA_XML")
+                {
+                    TechneaXMLReader techneaXMLReader = new TechneaXMLReader();
+                    importTables = techneaXMLReader.GetImportTables(UploadSettings.ImportLocation);
                 }
                 if (UploadSettings.UploadType == "UBL")
                 {

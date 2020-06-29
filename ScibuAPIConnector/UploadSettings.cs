@@ -30,6 +30,7 @@ namespace ScibuAPIConnector
         public static string MailTo { get; set; }
         public static string MailFrom { get; set; }
         public static string AllDirectories { get; set; }
+        public static string DeleteFTPFiles { get; set; }
         public static Token Token { get; set; }
         
         public static JArray Companies { get; set; }

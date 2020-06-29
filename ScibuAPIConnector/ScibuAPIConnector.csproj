@@ -48,6 +48,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomFunctions\Technea.cs" />
+    <Compile Include="CustomFunctions\TechneaXMLReader.cs" />
     <Compile Include="Extensions\ConverterExtension.cs" />
     <Compile Include="Extensions\LogExtension.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Services\CsvReader.cs" />
     <Compile Include="Services\DatabaseService.cs" />
     <Compile Include="Services\ExcelReader.cs" />
+    <Compile Include="Services\FtpService.cs" />
     <Compile Include="Services\LoggingService.cs" />
     <Compile Include="Services\MappingService.cs" />
     <Compile Include="Services\RequestService.cs" />

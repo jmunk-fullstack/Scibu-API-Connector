@@ -58,6 +58,7 @@
             UploadSettings.LastDateUpdate = ConfigurationManager.AppSettings["LastDateUpdate"];
             UploadSettings.SaveDates = ConfigurationManager.AppSettings["SaveDates"];
             UploadSettings.AllDirectories = ConfigurationManager.AppSettings["AllDirectories"];
+            UploadSettings.DeleteFTPFiles = ConfigurationManager.AppSettings["DeleteFTPFiles"];
             if (UploadSettings.AllDirectories == "true")
             {
                 UploadSettings.SaveDates = "false";
@@ -75,6 +76,10 @@
             Console.WriteLine("Reading config file...");
             ReadConfig();
             Console.WriteLine("Done reading the config file!");
+            Console.WriteLine("Downloading FTP files");
+            FtpService ftpService = new FtpService();
+            ftpService.DownloadFiles();
+            Console.WriteLine("Done downloading the FTP files");
             List<string> list = new List<string>();
             if (UploadSettings.AllDirectories != "true")
             {

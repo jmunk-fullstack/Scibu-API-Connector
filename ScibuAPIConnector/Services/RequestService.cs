@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ScibuAPIConnector.CustomFunctions;
 using ScibuAPIConnector.Extensions;
 
 namespace ScibuAPIConnector.Services
@@ -13,7 +14,7 @@ namespace ScibuAPIConnector.Services
     public class RequestService
     {
         public string Url = "https://api.scibu.com/api/";
-     //   public string Url = "http://localhost:3366/api/";
+       // public string Url = "http://localhost:3366/api/";
 
         public int AlreadyExist(string endpoint, string postData)
         {
@@ -252,26 +253,25 @@ namespace ScibuAPIConnector.Services
                                 {
                                     while (true)
                                     {
-                                        if (enumerator5.MoveNext())
+                                        if (!enumerator5.MoveNext())
                                         {
-                                            JToken token4 = enumerator5.Current;
-                                            bool flag12 = token4["field"].ToString().Equals("UACTIVITYID");
-                                            if (!flag12 || (token4["value"].ToString() != current[1].ToString()))
-                                            {
-                                                continue;
-                                            }
-                                            Console.WriteLine("Ticket already exist!");
-                                            num2 = int.Parse(current[0].ToString());
+                                            break;
                                         }
-                                        else
+
+                                        JToken token4 = enumerator5.Current;
+                                        bool flag12 = token4["field"].ToString().Equals("UACTIVITYID");
+                                        if (!flag12 || (token4["value"].ToString() != current[1].ToString()))
                                         {
                                             continue;
                                         }
-                                        break;
+                                        Console.WriteLine("Ticket already exist!");
+                                        num2 = int.Parse(current[0].ToString());
+
+                                        return num2;
                                     }
                                 }
-                                return num2;
                             }
+
                         }
                     }
                 }
@@ -298,6 +298,7 @@ namespace ScibuAPIConnector.Services
                                 {
                                     Console.WriteLine("Contact already exist!");
                                     num2 = int.Parse(data[0].ToString());
+                                    return num2;
                                 }
                                 else
                                 {
@@ -305,26 +306,23 @@ namespace ScibuAPIConnector.Services
                                     {
                                         while (true)
                                         {
-                                            if (enumerator3.MoveNext())
+                                            if (!enumerator3.MoveNext())
                                             {
-                                                JToken current = enumerator3.Current;
-                                                bool flag7 = current["field"].ToString().Equals("UCN_CONTACTPERSOON");
-                                                if (!flag7 || (current["value"].ToString() != data[2].ToString()))
-                                                {
-                                                    continue;
-                                                }
-                                                Console.WriteLine("Contact already exist!");
-                                                num2 = int.Parse(data[0].ToString());
+                                                break;
                                             }
-                                            else
+
+                                            JToken current = enumerator3.Current;
+                                            bool flag7 = current["field"].ToString().Equals("UCN_CONTACTPERSOON");
+                                            if (!flag7 || (current["value"].ToString() != data[2].ToString()))
                                             {
                                                 continue;
                                             }
-                                            break;
+                                            Console.WriteLine("Contact already exist!");
+                                            num2 = int.Parse(data[0].ToString());
+                                            return num2;
                                         }
                                     }
                                 }
-                                return num2;
                             }
                         }
                     }
@@ -353,7 +351,7 @@ namespace ScibuAPIConnector.Services
                         {
                             return "-1";
                         }
-                        else if ((UploadSettings.LastDateUpdate == DateTime.Now.Date.ToShortDateString()) && (UploadSettings.DatabaseName != "hkvportal") && (UploadSettings.DatabaseName != "continentaltestportal"))
+                        else if ((UploadSettings.LastDateUpdate == DateTime.Now.Date.ToShortDateString()) && (UploadSettings.DatabaseName != "hkvportal") && (UploadSettings.DatabaseName != "continentaltestportal") && (UploadSettings.DatabaseName != "techneatestportal"))
                         {
                             return "-1";
                         }
@@ -476,6 +474,13 @@ namespace ScibuAPIConnector.Services
                 LogExtension.Log(exception3.Message, DateTime.Now, postData, "");
                 str = "-1";
             }
+
+            if(str != "-1" && UploadSettings.DatabaseName.ToLower().Contains("technea") && (endpoint == "invoice" || endpoint.Contains("invoice/")))
+            {
+                var invoiceName = JObject.Parse(postData);
+                Technea.ImportPDF(str, invoiceName["InvoiceName"].ToString());
+            }
+
             return str;
         }
 

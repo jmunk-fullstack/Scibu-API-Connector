@@ -6,6 +6,8 @@
     using ScibuAPIConnector.Services;
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Web;
 
     public static class Technea
     {
@@ -161,6 +163,36 @@
                 flag24 = true;
             }
             return flag24;
+        }
+
+        public static void ImportPDF(string invoiceId, string invoiceName)
+        {
+            var pdfFile = AppDomain.CurrentDomain.BaseDirectory + "/Import Files/SI" + invoiceName + ".pdf";
+            var attachmentLocation = @"C:\inetpub\wwwroot\Techneatest\Modules\CustomerFiles\Invoice\CustomerInvoiceFile\" + invoiceId;
+
+            Console.WriteLine("Moving pdf file" );
+            Console.WriteLine("From: " + pdfFile);
+            Console.WriteLine("To: " + attachmentLocation + "\\SI" + invoiceName + ".pdf");
+            //attachmentLocation = @"E:\Qubics\Api Connector\Technea2\Import Files\" + invoiceId;
+            try
+            {
+                if (File.Exists(pdfFile))
+                {
+                    Console.WriteLine("PDF File exist");
+                    if (File.Exists(attachmentLocation + "\\SI" + invoiceName + ".pdf"))
+                    {
+                        File.Delete(attachmentLocation + "\\SI" + invoiceName + ".pdf");
+                    }
+                    Console.WriteLine("Moving PDF file");
+                    File.Move(pdfFile, attachmentLocation + "\\SI" + invoiceName + ".pdf");
+                } else
+                {
+                    Console.WriteLine("PDF file not exist");
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
