@@ -386,7 +386,7 @@ namespace ScibuAPIConnector.Services
             RequestService service = new RequestService();
             if (UploadSettings.UploadFiles.Any<string>(s => (s.IndexOf("offerteregel", StringComparison.CurrentCultureIgnoreCase) > -1)) || UploadSettings.UploadFiles.Any<string>(s => (s.IndexOf("offerte_regel", StringComparison.CurrentCultureIgnoreCase) > -1)))
             {
-                Console.WriteLine("Caching all the invoice products...");
+                Console.WriteLine("Caching all the quote products...");
                 JArray array2 = new JArray();
                 var doneCaching = false;
 

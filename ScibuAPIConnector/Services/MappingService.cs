@@ -10,8 +10,6 @@ namespace ScibuAPIConnector.Services
 {
     public class MappingService
     {
-        
-
         public List<MappingTable> MapXls(string xlsFile)
         {
             //Get all data from XLS and create an empty list of mapping tables.
@@ -102,6 +100,11 @@ namespace ScibuAPIConnector.Services
 
             foreach (var csvTable in csvTables)
             {
+                if (csvTable == null)
+                {
+                    break;
+                }
+
                 // Get all API calls in unique list
                 var uniqueMappingRows = new List<List<MappingRow>>();
 

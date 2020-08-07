@@ -52,15 +52,29 @@ namespace ScibuAPIConnector.Services
                         string address = UploadSettings.FilesUrl + str2 + "." + uploadType;
                         using (WebClient client = new WebClient())
                         {
-                            byte[] buffer = client.DownloadData(address);
-                            if (File.Exists(path))
+                            try
                             {
-                                File.Delete(path);
-                            }
-                            using (FileStream stream = File.Create(path))
+                                if (File.Exists(address))
+                                {
+                                    byte[] buffer = client.DownloadData(address);
+                                    if (File.Exists(path))
+                                    {
+                                        File.Delete(path);
+                                    }
+                                    using (FileStream stream = File.Create(path))
+                                    {
+                                        stream.Write(buffer, 0, buffer.Length);
+                                        stream.Close();
+                                    }
+                                } else
+                                {
+                                    return;
+                                }
+
+                            } catch(Exception ex)
                             {
-                                stream.Write(buffer, 0, buffer.Length);
-                                stream.Close();
+                                Console.WriteLine("Ftp files not found.");
+                                return;
                             }
                         }
 

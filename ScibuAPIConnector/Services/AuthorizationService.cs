@@ -11,7 +11,7 @@ namespace ScibuAPIConnector.Services
         public string grantType = "password";
         public string device = "iOS";
         public string url = "https://api.scibu.com/token";
-     //  public string url = "http://localhost:3366/token";
+       //public string url = "http://localhost:3366/token";
 
         public Token GetToken(string userName, string password, string clientId, string clientSecret)
         {
