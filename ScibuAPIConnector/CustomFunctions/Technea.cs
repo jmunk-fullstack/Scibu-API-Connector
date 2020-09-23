@@ -168,7 +168,7 @@
         public static void ImportPDF(string invoiceId, string invoiceName)
         {
             var pdfFile = AppDomain.CurrentDomain.BaseDirectory + "/Import Files/SI" + invoiceName + ".pdf";
-            var attachmentLocation = @"C:\inetpub\wwwroot\Techneatest\Modules\CustomerFiles\Invoice\CustomerInvoiceFile\" + invoiceId;
+            var attachmentLocation = UploadSettings.AttachmentUrl + invoiceId;
 
             Console.WriteLine("Moving pdf file" );
             Console.WriteLine("From: " + pdfFile);
@@ -184,6 +184,11 @@
                         File.Delete(attachmentLocation + "\\SI" + invoiceName + ".pdf");
                     }
                     Console.WriteLine("Moving PDF file");
+                    bool exists = System.IO.Directory.Exists(attachmentLocation);
+
+                    if (!exists)
+                        System.IO.Directory.CreateDirectory(attachmentLocation);
+
                     File.Move(pdfFile, attachmentLocation + "\\SI" + invoiceName + ".pdf");
                 } else
                 {

@@ -176,133 +176,150 @@ namespace ScibuAPIConnector.Services
             return newList;
         }
 
+        public void StartMapping(List<ImportTable> importTables)
+        {
+            var uniqueMappingRows = GetUniqueMappingRows(importTables);
+
+            //Merge customs
+            foreach (var checkMap in uniqueMappingRows.ToList())
+            {
+                //Get customs
+                var apiService = new ApiService();
+                var customs = apiService.GetCustoms();
+
+                foreach (var custom in customs)
+                {
+                    if (!checkMap[0].ApiCall.ToUpper().Contains(custom) && !checkMap[0].Remark.ToUpper().Contains(custom)) continue;
+
+                    // Merging custom fields with original
+                    if (custom.Equals("CUSTOMFIELD"))
+                    {
+                        // Add Custom Field Function
+                        apiService.AddCustomField(checkMap);
+
+                        //Get the API Call
+                        var mapWithoutCustom = checkMap[0].ApiCall.Replace("customfield", "");
+
+                        //Combine the customfield list to the normal one
+                        foreach (var checkMap2 in uniqueMappingRows.ToList())
+                        {
+                            if (checkMap2[0].ApiCall != mapWithoutCustom) continue;
+
+                            checkMap2.AddRange(checkMap);
+                            uniqueMappingRows.Remove(checkMap);
+                        }
+
+                        //Remove customfield to the API Calls
+                        foreach (var map in checkMap.ToList())
+                        {
+                            map.ApiCall = mapWithoutCustom;
+                            map.Remark = "CUSTOMFIELD";
+                        }
+                    }
+                    else
+                    {
+                        var mapTo = "";
+                        if (checkMap[0].Remark.Contains("MAPTO_INSIDE"))
+                        {
+                            mapTo = checkMap[0].Remark.Split('=')[1];
+                            checkMap[0].ApiField = mapTo + "_" + custom + "_" + checkMap[0].ApiField;
+                        }
+
+                        //Combine the customfield list to the mapper
+                        foreach (var checkMap2 in uniqueMappingRows.ToList())
+                        {
+                            if (mapTo == "") continue;
+                            if (!checkMap2[0].ApiCall.ToUpper().Contains(mapTo)) continue;
+
+                            checkMap2.AddRange(checkMap);
+                            uniqueMappingRows.Remove(checkMap);
+                        }
+                    }
+                }
+            }
+
+            foreach (var checkMap in uniqueMappingRows)
+            {
+                if (checkMap[0].ApiCall.Contains("customfield")) continue;
+
+                // Check if 
+                var apiService = new ApiService();
+                var tables = new List<ImportTable>();
+                // Add API Function
+                foreach (var table in importTables)
+                {
+                    if (table.ImportName != checkMap[0].CsvName) continue;
+                    tables.Add(table);
+
+                    if (table.ImportName != "Klanten") continue;
+                    foreach (var table2 in importTables)
+                    {
+                        if (table2.ImportName == "Klant_adressen")
+                        {
+                            tables.Add(table2);
+                        }
+                    }
+                }
+
+                if (tables[0].Rows.Count >= 10000000)
+                {
+                    var tableCount = tables[0].Rows.Count;
+                    var oldTable = tables[0].Rows;
+                    for (var i = 0; i < tableCount; i += 1000)
+                    {
+                        tables[0].Rows = oldTable.Skip(i).Take(1000).ToList();
+                        apiService.AddToAPi(checkMap, tables);
+                    }
+                }
+                else
+                {
+                    apiService.AddToAPi(checkMap, tables);
+                }
+
+
+
+
+                Console.WriteLine("Done adding " + checkMap[0].CsvName);
+            }
+        }
+
         public void GenerateMapping()
         {
             List<ImportTable> importTables = new List<ImportTable>();
             if ((UploadSettings.UploadFiles.Length != 1) || (UploadSettings.UploadFiles[0] != ""))
             {
-                //Get unique mapping rows by API call
-                if (UploadSettings.UploadType == "CSV")
-                {
-                    CsvReader CsvReader = new CsvReader();
-                    importTables = (from file in UploadSettings.UploadFiles select CsvReader.MapCsv(file, UploadSettings.ImportLocation + file + ".csv", UploadSettings.UploadSeperator)).ToList<ImportTable>();
-                }
-                if (UploadSettings.UploadType == "XML")
-                {
-                    XmlReader XmlReader = new XmlReader();
-                    importTables = (from file in UploadSettings.UploadFiles select XmlReader.MapXml(file, UploadSettings.ImportLocation + file + ".xml")).ToList<ImportTable>();
-                }
+
                 if (UploadSettings.UploadType == "TECHNEA_XML")
                 {
                     TechneaXMLReader techneaXMLReader = new TechneaXMLReader();
-                    importTables = techneaXMLReader.GetImportTables(UploadSettings.ImportLocation);
+                    foreach (string xmlFile in Directory.GetFiles(UploadSettings.ImportLocation, "*.xml", SearchOption.AllDirectories))
+                    {
+                        importTables = techneaXMLReader.GetImportTables(xmlFile);
+                        StartMapping(importTables);
+                    }
                 }
-                if (UploadSettings.UploadType == "UBL")
+                else
                 {
-                    UblReader UblReader = new UblReader();
-                    importTables = UblReader.GetImportTables(UploadSettings.ImportLocation + "Facturen.xml");
+                    //Get unique mapping rows by API call
+                    if (UploadSettings.UploadType == "CSV")
+                    {
+                        CsvReader CsvReader = new CsvReader();
+                        importTables = (from file in UploadSettings.UploadFiles select CsvReader.MapCsv(file, UploadSettings.ImportLocation + file + ".csv", UploadSettings.UploadSeperator)).ToList<ImportTable>();
+                    }
+                    if (UploadSettings.UploadType == "XML")
+                    {
+                        XmlReader XmlReader = new XmlReader();
+                        importTables = (from file in UploadSettings.UploadFiles select XmlReader.MapXml(file, UploadSettings.ImportLocation + file + ".xml")).ToList<ImportTable>();
+                    }
+                    if (UploadSettings.UploadType == "UBL")
+                    {
+                        UblReader UblReader = new UblReader();
+                        importTables = UblReader.GetImportTables(UploadSettings.ImportLocation + "Facturen.xml");
+                    }
+                    StartMapping(importTables);
                 }
 
-                var uniqueMappingRows = GetUniqueMappingRows(importTables);
 
-                //Merge customs
-                foreach (var checkMap in uniqueMappingRows.ToList())
-                {
-                    //Get customs
-                    var apiService = new ApiService();
-                    var customs = apiService.GetCustoms();
-
-                    foreach (var custom in customs)
-                    {
-                        if (!checkMap[0].ApiCall.ToUpper().Contains(custom) && !checkMap[0].Remark.ToUpper().Contains(custom)) continue;
-
-                        // Merging custom fields with original
-                        if (custom.Equals("CUSTOMFIELD"))
-                        {
-                            // Add Custom Field Function
-                            apiService.AddCustomField(checkMap);
-
-                            //Get the API Call
-                            var mapWithoutCustom = checkMap[0].ApiCall.Replace("customfield", "");
-
-                            //Combine the customfield list to the normal one
-                            foreach (var checkMap2 in uniqueMappingRows.ToList())
-                            {
-                                if (checkMap2[0].ApiCall != mapWithoutCustom) continue;
-
-                                checkMap2.AddRange(checkMap);
-                                uniqueMappingRows.Remove(checkMap);
-                            }
-
-                            //Remove customfield to the API Calls
-                            foreach (var map in checkMap.ToList())
-                            {
-                                map.ApiCall = mapWithoutCustom;
-                                map.Remark = "CUSTOMFIELD";
-                            }
-                        }
-                        else
-                        {
-                            var mapTo = "";
-                            if (checkMap[0].Remark.Contains("MAPTO_INSIDE"))
-                            {
-                                mapTo = checkMap[0].Remark.Split('=')[1];
-                                checkMap[0].ApiField = mapTo + "_" + custom + "_" + checkMap[0].ApiField;
-                            }
-
-                            //Combine the customfield list to the mapper
-                            foreach (var checkMap2 in uniqueMappingRows.ToList())
-                            {
-                                if (mapTo == "") continue;
-                                if (!checkMap2[0].ApiCall.ToUpper().Contains(mapTo)) continue;
-
-                                checkMap2.AddRange(checkMap);
-                                uniqueMappingRows.Remove(checkMap);
-                            }
-                        }
-                    }
-                }
-
-                foreach (var checkMap in uniqueMappingRows)
-                {
-                    if (checkMap[0].ApiCall.Contains("customfield")) continue;
-
-                    // Check if 
-                    var apiService = new ApiService();
-                    var tables = new List<ImportTable>();
-                    // Add API Function
-                    foreach (var table in importTables)
-                    {
-                        if (table.ImportName != checkMap[0].CsvName) continue;
-                        tables.Add(table);
-
-                        if (table.ImportName != "Klanten") continue;
-                        foreach (var table2 in importTables)
-                        {
-                            if (table2.ImportName == "Klant_adressen")
-                            {
-                                tables.Add(table2);
-                            }
-                        }
-                    }
-
-                    if (tables[0].Rows.Count >= 10000000)
-                    {
-                        var tableCount = tables[0].Rows.Count;
-                        var oldTable = tables[0].Rows;
-                        for (var i = 0; i < tableCount; i += 1000)
-                        {
-                            tables[0].Rows = oldTable.Skip(i).Take(1000).ToList();
-                            apiService.AddToAPi(checkMap, tables);
-                        }
-                    }
-                    else
-                    {
-                        apiService.AddToAPi(checkMap, tables);
-                    }
-
-                    Console.WriteLine("Done adding " + checkMap[0].CsvName);
-                }
             }
         }
     }

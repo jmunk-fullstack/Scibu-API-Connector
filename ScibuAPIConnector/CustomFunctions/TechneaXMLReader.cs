@@ -15,19 +15,21 @@
         public List<string> allInvoiceResult = new List<string>();
         public string[] allInvoiceLineResult;
 
-        public List<ImportTable> GetImportTables(string xmlDirectory)
+        public List<ImportTable> GetImportTables(string xmlFile)
         {
+            allInvoiceHeaders.Clear();
+            allInvoiceLineHeaders.Clear();
+            allInvoiceResult.Clear();
+            allInvoiceLineResult = new string[] { };
+
             var importTables = new List<ImportTable>();
 
-            foreach (string xmlFile in Directory.GetFiles(xmlDirectory, "*.xml", SearchOption.AllDirectories))
-            {
-                var invoiceImportTable = new ImportTable("Facturen", ReadInvoiceColumns(xmlFile).ToArray(), ReadInvoiceResult(xmlFile));
-                var invoiceNumber = invoiceImportTable.Rows[0][0];
-                var invoiceProductImportTable = new ImportTable("Factuurregels", ReadInvoiceLineColumns(xmlFile).ToArray(), ReadInvoiceLineResult(xmlFile, invoiceNumber));
+            var invoiceImportTable = new ImportTable("Facturen", ReadInvoiceColumns(xmlFile).ToArray(), ReadInvoiceResult(xmlFile));
+            var invoiceNumber = invoiceImportTable.Rows[0][0];
+            var invoiceProductImportTable = new ImportTable("Factuurregels", ReadInvoiceLineColumns(xmlFile).ToArray(), ReadInvoiceLineResult(xmlFile, invoiceNumber));
 
-                importTables.Add(invoiceImportTable);
-                importTables.Add(invoiceProductImportTable);
-            }
+            importTables.Add(invoiceImportTable);
+            importTables.Add(invoiceProductImportTable);
 
             return importTables;
         }

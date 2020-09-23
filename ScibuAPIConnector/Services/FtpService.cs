@@ -31,7 +31,8 @@ namespace ScibuAPIConnector.Services
                     {
                         string str = uploadFiles[num];
                         string str2 = str;
-                        if (UploadSettings.DatabaseName == "techneaportal")
+                        var downloadAll = false;
+                        if (UploadSettings.DatabaseName == "techneaportal" || UploadSettings.DatabaseName == "techneatestportal")
                         {
                             if (str.Contains("Offerteregels"))
                             {
@@ -41,40 +42,55 @@ namespace ScibuAPIConnector.Services
                             {
                                 str2 = "offertes/Offertes";
                             }
+                            else if (str.Contains("Facturen"))
+                            {
+                                downloadAll = true;
+                            }
                         }
                         string uploadType = UploadSettings.UploadType;
                         if (uploadType == "CSV")
                         {
                             uploadType = "csv";
                         }
-                        Console.WriteLine("Downloading files from the FTP server...");
+                        Console.WriteLine("Downloading files from the FTP server... ");
                         string path = UploadSettings.ImportLocation + str + "." + UploadSettings.UploadType;
                         string address = UploadSettings.FilesUrl + str2 + "." + uploadType;
-                        using (WebClient client = new WebClient())
+
+                        if (downloadAll == true)
                         {
-                            try
+                            Copy(UploadSettings.FilesUrl, UploadSettings.ImportLocation);
+                        }
+                        else
+                        {
+
+                            using (WebClient client = new WebClient())
                             {
-                                if (File.Exists(address))
+                                try
                                 {
-                                    byte[] buffer = client.DownloadData(address);
-                                    if (File.Exists(path))
+                                    if (File.Exists(address))
                                     {
-                                        File.Delete(path);
+                                        byte[] buffer = client.DownloadData(address);
+                                        if (File.Exists(path))
+                                        {
+                                            File.Delete(path);
+                                        }
+                                        using (FileStream stream = File.Create(path))
+                                        {
+                                            stream.Write(buffer, 0, buffer.Length);
+                                            stream.Close();
+                                        }
                                     }
-                                    using (FileStream stream = File.Create(path))
+                                    else
                                     {
-                                        stream.Write(buffer, 0, buffer.Length);
-                                        stream.Close();
+                                        return;
                                     }
-                                } else
+
+                                }
+                                catch (Exception ex)
                                 {
+                                    Console.WriteLine("Ftp files not found.");
                                     return;
                                 }
-
-                            } catch(Exception ex)
-                            {
-                                Console.WriteLine("Ftp files not found.");
-                                return;
                             }
                         }
 
@@ -93,5 +109,35 @@ namespace ScibuAPIConnector.Services
                 num++;
             }
         }
+
+
+        public static void Copy(string sourceDirectory, string targetDirectory)
+        {
+            var diSource = new DirectoryInfo(sourceDirectory);
+            var diTarget = new DirectoryInfo(targetDirectory);
+
+            CopyAll(diSource, diTarget);
+        }
+
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        {
+            Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into the new directory.
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
+                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir);
+            }
+        }
     }
 }
+

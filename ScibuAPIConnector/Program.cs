@@ -59,6 +59,7 @@
             UploadSettings.SaveDates = ConfigurationManager.AppSettings["SaveDates"];
             UploadSettings.AllDirectories = ConfigurationManager.AppSettings["AllDirectories"];
             UploadSettings.DeleteFTPFiles = ConfigurationManager.AppSettings["DeleteFTPFiles"];
+            UploadSettings.AttachmentUrl = ConfigurationManager.AppSettings["AttachmentUrl"];
             if (UploadSettings.AllDirectories == "true")
             {
                 UploadSettings.SaveDates = "false";

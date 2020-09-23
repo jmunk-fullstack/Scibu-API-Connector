@@ -218,7 +218,7 @@ namespace ScibuAPIConnector.Services
                     }
                     catch (Exception exception1)
                     {
-                        LogExtension.Log(exception1.Message, DateTime.Now, "", "");
+                        //LogExtension.Log(exception1.Message, DateTime.Now, "", "");
                     }
                 }
             }
