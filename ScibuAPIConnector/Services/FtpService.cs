@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using ScibuAPIConnector.CustomFunctions;
 
 namespace ScibuAPIConnector.Services
 {
@@ -62,7 +63,6 @@ namespace ScibuAPIConnector.Services
                         }
                         else
                         {
-
                             using (WebClient client = new WebClient())
                             {
                                 try
@@ -82,6 +82,7 @@ namespace ScibuAPIConnector.Services
                                     }
                                     else
                                     {
+                                        SendHKVMail(str);
                                         return;
                                     }
 
@@ -89,6 +90,7 @@ namespace ScibuAPIConnector.Services
                                 catch (Exception ex)
                                 {
                                     Console.WriteLine("Ftp files not found.");
+                                    SendHKVMail(str);
                                     return;
                                 }
                             }
@@ -107,6 +109,17 @@ namespace ScibuAPIConnector.Services
                     break;
                 }
                 num++;
+            }
+        }
+
+        public void SendHKVMail(string str)
+        {
+            //Mail naar Maarten, ftp files niet gevonden.
+            if (UploadSettings.DatabaseName == "hkvportal")
+            {
+                var HKV = new HKV();
+                var body = $"Er is een fout opgetreden tijdens de import van HKV naar Scibu. Het ftp bestand {str} is niet aanwezig.";
+                HKV.SendMail(body, "Fout tijdens import scibu!");
             }
         }
 

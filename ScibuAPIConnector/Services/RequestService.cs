@@ -14,7 +14,7 @@ namespace ScibuAPIConnector.Services
     public class RequestService
     {
         public string Url = "https://api.scibu.com/api/";
-       // public string Url = "http://localhost:3366/api/";
+        //public string Url = "http://localhost:3366/api/";
 
         public int AlreadyExist(string endpoint, string postData)
         {

@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomFunctions\HKV.cs" />
     <Compile Include="CustomFunctions\Technea.cs" />
     <Compile Include="CustomFunctions\TechneaXMLReader.cs" />
     <Compile Include="Extensions\ConverterExtension.cs" />
