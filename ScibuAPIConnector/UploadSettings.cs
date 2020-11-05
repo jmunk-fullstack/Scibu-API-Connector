@@ -45,6 +45,9 @@ namespace ScibuAPIConnector
         public static JArray OrderProducts { get; set; }
         public static JArray Tickets { get; set; }
         public static JArray InvoiceProducts { get; set; }
+        public static string HkvMailTo { get; set; }
+        public static string SmtpUsername { get; set; }
+        public static string SmtpPassword { get; set; }
 
     }
 }

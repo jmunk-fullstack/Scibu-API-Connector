@@ -90,6 +90,7 @@ namespace ScibuAPIConnector.Services
                                 catch (Exception ex)
                                 {
                                     Console.WriteLine("Ftp files not found.");
+                                    Console.WriteLine(ex);
                                     SendHKVMail(str);
                                     return;
                                 }

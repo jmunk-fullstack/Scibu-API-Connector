@@ -60,6 +60,9 @@
             UploadSettings.AllDirectories = ConfigurationManager.AppSettings["AllDirectories"];
             UploadSettings.DeleteFTPFiles = ConfigurationManager.AppSettings["DeleteFTPFiles"];
             UploadSettings.AttachmentUrl = ConfigurationManager.AppSettings["AttachmentUrl"];
+            UploadSettings.HkvMailTo = ConfigurationManager.AppSettings["HkvMailTo"];
+            UploadSettings.SmtpUsername = ConfigurationManager.AppSettings["SmtpUsername"];
+            UploadSettings.SmtpPassword = ConfigurationManager.AppSettings["SmtpPassword"];
             if (UploadSettings.AllDirectories == "true")
             {
                 UploadSettings.SaveDates = "false";

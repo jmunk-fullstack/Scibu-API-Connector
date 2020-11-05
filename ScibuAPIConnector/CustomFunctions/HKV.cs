@@ -9,7 +9,7 @@ namespace ScibuAPIConnector.CustomFunctions
 {
     public class HKV
     {
-        public string _mailTo = "maarten@hkvochten.nl";
+        public string _mailTo = UploadSettings.HkvMailTo;
         public string _mailFrom = "support@qubics.nl";
 
         public void SendMail(string body, string subject)
@@ -25,7 +25,7 @@ namespace ScibuAPIConnector.CustomFunctions
             SmtpClient smtp = new SmtpClient
             {
                 Host = "smtp.office365.com", //Or Your SMTP Server Address
-                Credentials = new System.Net.NetworkCredential("t.bizot@qubics.nl", "f48N885jngj8"),
+                Credentials = new System.Net.NetworkCredential(UploadSettings.SmtpUsername, UploadSettings.SmtpPassword),
 
                 EnableSsl = true
             };
