@@ -24,10 +24,9 @@ namespace ScibuAPIConnector.CustomFunctions
 
             SmtpClient smtp = new SmtpClient
             {
-                Host = "smtp.office365.com", //Or Your SMTP Server Address
-                Credentials = new System.Net.NetworkCredential(UploadSettings.SmtpUsername, UploadSettings.SmtpPassword),
-
-                EnableSsl = true
+                Host = "smtprelay.wearehostingyou.com", //Or Your SMTP Server Address
+                //EnableSsl = true,
+                Port = 25,
             };
 
             smtp.Send(mail);

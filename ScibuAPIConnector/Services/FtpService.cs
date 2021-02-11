@@ -91,7 +91,10 @@ namespace ScibuAPIConnector.Services
                                 {
                                     Console.WriteLine("Ftp files not found.");
                                     Console.WriteLine(ex);
-                                    SendHKVMail(str);
+                                    if(UploadSettings.SendHkvMail == "true")
+                                    {
+                                        SendHKVMail(str);
+                                    }
                                     return;
                                 }
                             }
@@ -116,7 +119,7 @@ namespace ScibuAPIConnector.Services
         public void SendHKVMail(string str)
         {
             //Mail naar Maarten, ftp files niet gevonden.
-            if (UploadSettings.DatabaseName == "hkvportal")
+            if (UploadSettings.DatabaseName == "hkvportal" && UploadSettings.SendHkvMail == "true")
             {
                 var HKV = new HKV();
                 var body = $"Er is een fout opgetreden tijdens de import van HKV naar Scibu. Het ftp bestand {str} is niet aanwezig.";

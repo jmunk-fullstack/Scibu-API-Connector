@@ -11,52 +11,56 @@
     {
         public ImportTable MapCsv(string csvName, string csvFile, string customSeperator)
         {
-            List<string> list = this.ReadCsv(csvFile);
-            char[] separator = new char[] { '\t' };
-            if(customSeperator != "tab")
+            if (File.Exists(csvFile))
             {
-                separator = new char[] { ',' };
-            }
-            if (list.Count > 0)
-            {
-                string[] columns = list[0].Split(separator).ToArray<string>();
-                int index = 0;
-                while (true)
+                List<string> list = this.ReadCsv(csvFile);
+                char[] separator = new char[] { '\t' };
+                if (customSeperator != "tab")
                 {
-                    if (index >= columns.Length)
+                    separator = new char[] { ',' };
+                }
+                if (list.Count > 0)
+                {
+                    string[] columns = list[0].Split(separator).ToArray<string>();
+                    int index = 0;
+                    while (true)
                     {
-                        List<string[]> rows = new List<string[]>();
-                        int num = 0;
-                        foreach (string str in list)
+                        if (index >= columns.Length)
                         {
-                            if (num != 0)
+                            List<string[]> rows = new List<string[]>();
+                            int num = 0;
+                            foreach (string str in list)
                             {
-                                char[] chArray2 = new char[] { '\t' };
-                                if (customSeperator != "tab")
+                                if (num != 0)
                                 {
-                                    chArray2 = new char[] { ',' };
-                                }
-                                string[] item = str.Split(chArray2).ToArray<string>();
-                                int num3 = 0;
-                                while (true)
-                                {
-                                    if (num3 >= item.Length)
+                                    char[] chArray2 = new char[] { '\t' };
+                                    if (customSeperator != "tab")
                                     {
-                                        rows.Add(item);
-                                        break;
+                                        chArray2 = new char[] { ',' };
                                     }
-                                    item[num3] = item[num3].HtmlDecode().RemoveSpecialCharacters();
-                                    num3++;
+                                    string[] item = str.Split(chArray2).ToArray<string>();
+                                    int num3 = 0;
+                                    while (true)
+                                    {
+                                        if (num3 >= item.Length)
+                                        {
+                                            rows.Add(item);
+                                            break;
+                                        }
+                                        item[num3] = item[num3].HtmlDecode().RemoveSpecialCharacters();
+                                        num3++;
+                                    }
                                 }
+                                num++;
                             }
-                            num++;
+                            return new ImportTable(csvName, columns, rows);
                         }
-                        return new ImportTable(csvName, columns, rows);
+                        columns[index] = columns[index].RemoveSpecialCharacters();
+                        index++;
                     }
-                    columns[index] = columns[index].RemoveSpecialCharacters();
-                    index++;
                 }
             }
+            
             return null;
         }
 

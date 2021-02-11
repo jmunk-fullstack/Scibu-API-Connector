@@ -48,6 +48,7 @@ namespace ScibuAPIConnector
         public static string HkvMailTo { get; set; }
         public static string SmtpUsername { get; set; }
         public static string SmtpPassword { get; set; }
+        public static string SendHkvMail { get; set; }
 
     }
 }

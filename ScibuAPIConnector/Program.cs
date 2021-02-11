@@ -63,6 +63,7 @@
             UploadSettings.HkvMailTo = ConfigurationManager.AppSettings["HkvMailTo"];
             UploadSettings.SmtpUsername = ConfigurationManager.AppSettings["SmtpUsername"];
             UploadSettings.SmtpPassword = ConfigurationManager.AppSettings["SmtpPassword"];
+            UploadSettings.SendHkvMail = ConfigurationManager.AppSettings["SendHkvMail"];
             if (UploadSettings.AllDirectories == "true")
             {
                 UploadSettings.SaveDates = "false";
