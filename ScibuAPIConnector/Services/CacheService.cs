@@ -203,7 +203,6 @@ namespace ScibuAPIConnector.Services
                             JToken current = enumerator.Current;
                             JArray array1 = new JArray();
                             array1.Add(current["id"]);
-                            array1.Add(current["externalId"]);
                             array3 = array1;
                             if (UploadSettings.DatabaseName == "hkvportal")
                             {
@@ -214,7 +213,14 @@ namespace ScibuAPIConnector.Services
                                     {
                                         array3.Add(token2["value"]);
                                     }
+                                    if (str2.Equals("UCN_ZP_Code"))
+                                    {
+                                        array3.Add(token2["value"]);
+                                    }
                                 }
+                            } else
+                            {
+                                array1.Add(current["externalId"]);
                             }
                         }
                         else

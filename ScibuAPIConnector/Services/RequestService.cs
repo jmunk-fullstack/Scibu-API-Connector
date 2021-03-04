@@ -290,20 +290,43 @@ namespace ScibuAPIConnector.Services
                             }
                             JToken data = enumerator2.Current;
                             string splittedFilter = "ExternalId";
-                            if ((from property in obj2.Properties()
-                                 where string.Equals(property.Name, splittedFilter, StringComparison.CurrentCultureIgnoreCase)
-                                 select property).Any<JProperty>(property => property.Value.ToString().Equals(data[1].ToString())))
+                            if (UploadSettings.DatabaseName != "hkvportal")
                             {
-                                if (UploadSettings.DatabaseName != "hkvportal")
+                                if ((from property in obj2.Properties()
+                                     where string.Equals(property.Name, splittedFilter, StringComparison.CurrentCultureIgnoreCase)
+                                     select property).Any<JProperty>(property => property.Value.ToString().Equals(data[1].ToString())))
                                 {
                                     Console.WriteLine("Contact already exist!");
                                     num2 = int.Parse(data[0].ToString());
                                     return num2;
                                 }
-                                else
+                            }
+                            else
+                            {
+                                var foundContactPerson = false;
+                                using (IEnumerator<JToken> enumerator3 = ((IEnumerable<JToken>)obj2["CUSTOMFIELDS"]).GetEnumerator())
+                                {
+                                    while (true)
+                                    {
+                                        if (!enumerator3.MoveNext())
+                                        {
+                                            break;
+                                        }
+
+                                        JToken current = enumerator3.Current;
+                                        bool flag7 = current["field"].ToString().Equals("UCN_CONTACTPERSOON");
+                                        if (!flag7 || (current["value"].ToString() != data[1].ToString()))
+                                        {
+                                            continue;
+                                        }
+                                        foundContactPerson = true;
+                                    }
+                                }
+                                if (foundContactPerson)
                                 {
                                     using (IEnumerator<JToken> enumerator3 = ((IEnumerable<JToken>)obj2["CUSTOMFIELDS"]).GetEnumerator())
                                     {
+
                                         while (true)
                                         {
                                             if (!enumerator3.MoveNext())
@@ -312,7 +335,8 @@ namespace ScibuAPIConnector.Services
                                             }
 
                                             JToken current = enumerator3.Current;
-                                            bool flag7 = current["field"].ToString().Equals("UCN_CONTACTPERSOON");
+
+                                            bool flag7 = current["field"].ToString().Equals("UCN_ZP_CODE");
                                             if (!flag7 || (current["value"].ToString() != data[2].ToString()))
                                             {
                                                 continue;
@@ -323,9 +347,9 @@ namespace ScibuAPIConnector.Services
                                         }
                                     }
                                 }
+                                }
                             }
                         }
-                    }
                 }
                 return -1;
             }
